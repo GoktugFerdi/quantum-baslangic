@@ -1,0 +1,19 @@
+# Bağımlılıklar ve derleme çıktıları
+node_modules/
+dist/
+build/
+
+# Gizli ayarlar ve anahtarlar: ASLA depoya girmez
+.env
+.env.*
+*.key
+*secret*
+*mnemonic*
+
+# Editör ve sistem dosyaları
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Word'ün açık dosya için oluşturduğu geçici kopyalar
+~$*
