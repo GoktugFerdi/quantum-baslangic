@@ -135,5 +135,61 @@ button.ikincil {
   user-select: none;
 }
 
+/* --- İP 13 paneli --- */
+.panel {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 2px solid var(--cizgi);
+  display: grid;
+  gap: 16px;
+}
+.panel-baslik { font-size: 1.3rem; margin: 0; }
+.panel .uyari { margin: 0; }
+.panel h3 { margin: 20px 0 4px; font-size: 1rem; }
+.alan-etiketi { display: block; font-size: 0.85rem; color: var(--soluk); margin-bottom: 6px; }
+
+textarea, input, select {
+  font: inherit;
+  color: var(--metin);
+  background: var(--kod-zemin);
+  border: 1px solid var(--cizgi);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+textarea {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--mono);
+  resize: vertical;
+}
+/* Yazılan kelimeleri nokta olarak gösterir; "Göster" ile açılır. */
+textarea.maskeli { -webkit-text-security: disc; text-security: disc; }
+
+.kart .dugmeler { margin-top: 12px; }
+
+.sonuc { margin: 12px 0 0; font-weight: 500; }
+.sonuc.iyi { color: #2f8a4f; }
+.sonuc.kotu { color: #c2413a; }
+
+.deney-satiri {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin-top: 12px;
+}
+.deney-satiri label { display: grid; gap: 4px; font-size: 0.85rem; color: var(--soluk); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 0.9rem;
+}
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--cizgi); }
+th { color: var(--soluk); font-weight: 500; }
+tr.kabul td:last-child { color: #b7791f; font-weight: 500; }
+tr.ret td:last-child { color: #2f8a4f; }
+
 .cagri, .aciklama { margin: 10px 0 0; font-size: 0.92rem; color: var(--soluk); }
 .cagri code { font-family: var(--mono); color: var(--metin); }

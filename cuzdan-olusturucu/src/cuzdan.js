@@ -158,3 +158,91 @@ export function cuzdanOlustur(entropi = entropiUret()) {
 export function hex(bayt) {
   return hexlify(bayt);
 }
+
+// ===========================================================================
+// İP 13: Kelimelerden adres bulma ve checksum deneyi
+// ===========================================================================
+
+// Kullanıcının yazdığı metni kelime listesine çevirir.
+// "1. kelime 2. kelime" gibi numaralı biçimi, büyük harfleri ve fazla
+// boşlukları temizler.
+export function ifadeyiTemizle(metin) {
+  return metin
+    .toLowerCase()
+    .replace(/\d+\s*[.)]/g, " ")
+    .split(/[\s,]+/)
+    .filter(Boolean);
+}
+
+const LISTE = Mnemonic.fromEntropy(new Uint8Array(16)).wordlist; // BIP39 İngilizce
+
+export function kelimeListesi() {
+  const kelimeler = [];
+  for (let i = 0; i < 2048; i++) kelimeler.push(LISTE.getWord(i));
+  return kelimeler;
+}
+
+// Kelimelerin geçerli bir BIP39 mnemonic olup olmadığını kontrol eder ve
+// geçersizse NEDENİNİ söyler. Bu kontrol yalnızca biçim kontrolüdür:
+//   1. kelime sayısı 12 mi?
+//   2. her kelime 2048 kelimelik listede var mı?
+//   3. son 4 bit (checksum), ilk 128 bitin SHA-256 özetiyle tutuyor mu?
+export function mnemonicDogrula(kelimeler) {
+  if (kelimeler.length !== 12) {
+    return { gecerli: false, neden: "sayi", mesaj: `12 kelime olmalı, ${kelimeler.length} kelime girildi.` };
+  }
+  const bilinmeyenler = kelimeler
+    .map((k, i) => ({ sira: i + 1, k }))
+    .filter(({ k }) => LISTE.getWordIndex(k) === -1);
+  if (bilinmeyenler.length) {
+    return {
+      gecerli: false,
+      neden: "kelime",
+      mesaj: "BIP39 listesinde olmayan kelime var (sıra: " + bilinmeyenler.map((b) => b.sira).join(", ") + ").",
+    };
+  }
+  if (!Mnemonic.isValidMnemonic(kelimeler.join(" "))) {
+    return {
+      gecerli: false,
+      neden: "checksum",
+      mesaj: "Kelimelerin hepsi listede ama checksum tutmuyor: son 4 bit, ilk 128 bitin SHA-256 özetiyle uyuşmuyor.",
+    };
+  }
+  return { gecerli: true, neden: null, mesaj: "Geçerli: 12 kelime, hepsi listede ve checksum tutuyor." };
+}
+
+// Geçerli kelimelerden İP 12'deki aynı zinciri izleyerek adresi bulur:
+// kelimeler → seed → master → m/44'/60'/0'/0/0 → private key → public key → adres
+export function kelimelerdenAdres(kelimeler) {
+  const mnemonic = Mnemonic.fromPhrase(kelimeler.join(" "));
+  const hesap = yolTuret(masterAnahtar(seedHesapla(mnemonic)));
+  return { adres: adresHesapla(publicKeyHesapla(hesap.privateKey)).adres, yol: hesap.path };
+}
+
+// Checksum deneyi: `sira` numaralı (1–12) kelimeyi `yeniKelime` ile değiştirip
+// sonucun geçerli olup olmadığını döndürür.
+export function tekKelimeDegistir(kelimeler, sira, yeniKelime) {
+  const kopya = [...kelimeler];
+  kopya[sira - 1] = yeniKelime;
+  return mnemonicDogrula(kopya);
+}
+
+// Her sıradaki kelimeyi listedeki diğer 2047 kelimeyle tek tek değiştirip
+// kaç tanesinin yine de "geçerli" sayıldığını sayar.
+// Beklenti: checksum 4 bit olduğu için ~1/16. Son kelimenin 7 biti entropi,
+// 4 biti checksum olduğu için orada tam 2^7 − 1 = 127 geçerli değişiklik olur.
+export function checksumIstatistigi(kelimeler) {
+  const satirlar = [];
+  for (let sira = 1; sira <= 12; sira++) {
+    const kopya = [...kelimeler];
+    let gecerli = 0;
+    for (let i = 0; i < 2048; i++) {
+      const aday = LISTE.getWord(i);
+      if (aday === kelimeler[sira - 1]) continue;
+      kopya[sira - 1] = aday;
+      if (Mnemonic.isValidMnemonic(kopya.join(" "))) gecerli++;
+    }
+    satirlar.push({ sira, denenen: 2047, gecerli });
+  }
+  return satirlar;
+}

@@ -1,5 +1,6 @@
 import "./style.css";
 import { cuzdanOlustur, ENTROPI_BAYT, YOL, PASSPHRASE } from "./cuzdan.js";
+import { dogrulamaPaneli } from "./dogrulama.js";
 
 // Tüm değerler yalnızca bu sayfanın belleğinde tutulur.
 // console.log, fetch, localStorage KULLANILMAZ; sayfa yenilenince her şey silinir.
@@ -20,7 +21,10 @@ app.innerHTML = `
     </div>
   </header>
   <main id="asamalar"></main>
+  <section id="dogrulama" class="panel"></section>
 `;
+
+dogrulamaPaneli(document.querySelector("#dogrulama"));
 
 const asamalar = document.querySelector("#asamalar");
 const hepsiniGizleBtn = document.querySelector("#hepsiniGizle");
