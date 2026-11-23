@@ -86,6 +86,4 @@ Geliştirme sırasında şu kontroller yapıldı ve hepsi geçti:
 
 Uygulamamda 12 kelime 2. kartta, private key ise 6. kartta görünüyor ve aralarında üç dönüşüm var: seed, master anahtar ve türetme yolu. **Mnemonic** bütün anahtar ağacının köküdür. Aynı 12 kelimeden yolun son rakamını değiştirerek (`…/0/0`, `…/0/1`, `…/0/2` …) sınırsız sayıda hesap türetilebilir. **Private key** ise bu ağacın tek bir yaprağıdır ve yalnızca o tek hesabı kontrol eder. Bu yüzden private key'i sızan kişi bir hesabını, 12 kelimesi sızan kişi ise o kelimelerden türeyen bütün hesaplarını kaybeder. Ok yalnızca tek yönde ilerler: kelimelerden private key hesaplanabilir, ama private key'den kelimelere geri dönülemez. Ayrıca aynı kelimeler farklı bir passphrase ya da farklı bir yol ile bambaşka anahtarlar verir. Bu yüzden İP 13'te MetaMask ile karşılaştırırken yolun ve passphrase'in aynı olması gerekiyor.
 
-## Güvenlik notu
 
-Bu depodaki her şey **yalnızca eğitim amaçlı**. Kurtarma kelimeleri, seed, private key veya entropi bu depoya, ekran görüntülerine ya da mesajlara **asla** girmiyor. Yalnızca Sepolia test ağı kullanılıyor; eğitim cüzdanlarına gerçek varlık konmuyor.
