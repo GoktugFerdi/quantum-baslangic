@@ -18,8 +18,16 @@ Bu dosya, Quantum Team Blokzincir Takımı'nın ortak isim kayıt sözleşmesini
 | Optimizasyon | Kapalı |
 | EVM hedefi | cancun |
 
-### Benim kopyam (Sepolia)
+### Benim kopyalarım (Sepolia)
 
+Derleyici 0.8.34 (Remix), optimizasyon ve EVM ayarı varsayılan.
+
+**Kopya 2 (kullandığım kopya)**
+- Sözleşme adresi: `0xA30F57a6443170839A94D2f1341d02cC7744D253`
+- Deploy tx hash: `0xbb1d67fe7c060928a9d1baa3aa699be73748833e05a30cac2dc7294487fd8a26` (blok 12202796, nonce 5)
+- https://sepolia.etherscan.io/address/0xA30F57a6443170839A94D2f1341d02cC7744D253
+
+**Kopya 1 (kullanılmıyor)**
 - Sözleşme adresi: `0x77724f2EF322260f745BeFd77206F8751e53070b`
 - Deploy tx hash: `0xd7e174563233e5725f73fedc00de7fd676ea80b84f15720930b375d2b5ccfbe0` (blok 12202477, nonce 3)
-- https://sepolia.etherscan.io/address/0x77724f2EF322260f745BeFd77206F8751e53070b
+- Bu kopyaya Remix'ten yanlışlıkla bir kayıt gönderildi (`0x5f9f3658872dafdf3717653e1a93e7f6253ba90a3d03d45669d1501cfa6d30b0`). İlk kaydın Etherscan'den yapılması istendiği için Kopya 2 açıldı.
