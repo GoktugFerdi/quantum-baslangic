@@ -112,3 +112,33 @@ Ekran görüntüleri: `notlar/ekran-goruntuleri/ip21-tekrar-kayit-revert.png` (2
 ### Benim yorumum: Adres başına sınır gerçek kişi sayısını neden garanti etmez?
 
 Sözleşme kişiyi değil, yalnızca işlemi imzalayan adresi görüyor. Cüzdan adresi oluşturmak ücretsiz ve sınırsız olduğu için tek bir kişi birçok adres üretip her biriyle bir kez kayıt olabilir. Böylece 3 kişilik kapasite tek kişiyle dolabilir. Gerçek kişi başına sınır için sözleşme dışında kimlik doğrulaması gerekir.
+
+---
+
+## GfuEvent.sol (İP 22: Görevli ve Giriş Kontrolünü Ekle)
+
+Aynı sözleşmeye görevli ve giriş kontrolü ekledim. Önceki sürümler duruyor: [`GfuEvent_v1_ip20.sol`](GfuEvent_v1_ip20.sol), [`GfuEvent_v2_ip21.sol`](GfuEvent_v2_ip21.sol). Güncel sürüm [`GfuEvent.sol`](GfuEvent.sol). Yalnızca yerel ortamda çalıştırıldı, Sepolia'ya gönderilmedi.
+
+### Eklenen özellikler
+
+- **Görevli:** `address public gorevli`. `constructor` içinde `gorevli = msg.sender` olduğu için sözleşmeyi deploy eden adres görevli olur.
+- **Giriş durumu:** `mapping(address => bool) public girisYaptiMi`. Bir katılımcının giriş durumu dışarıdan okunur.
+- **`girisYap(address katilimci)`:** Yalnızca görevli çağırabilir (`require(msg.sender == gorevli)`). Adres kayıtlı olmalı (`require(kayitliMi[katilimci])`) ve daha önce giriş yapmamış olmalı (`require(!girisYaptiMi[katilimci])`).
+- **Event'ler:** `KayitYapildi(address indexed katilimci, string ad)` başarılı kayıtta, `GirisYapildi(address indexed katilimci)` başarılı girişte yayımlanır. İkisinde de katılımcı adresi var.
+
+### Denemeler
+
+Denemeleri [`test/ip22-test.js`](test/ip22-test.js) betiğiyle yerel bir EVM'de (ganache) çalıştırdım. Hesap 1 sözleşmeyi deploy eden ve görevli olan hesap.
+
+| # | Deneme | Beklenen | Gözlenen |
+|---|---|---|---|
+| 1 | Görevli, kayıtlı Hesap 2'ye giriş verir | Başarı; giriş durumu değişir, event oluşur | Başarı; `girisYaptiMi(Hesap 2)` true, `GirisYapildi(Hesap 2 adresi)` event'i oluştu |
+| 2 | Görevli olmayan hesap (Hesap 3) giriş verir | Ret; durum değişmez | Ret (`Sadece gorevli giris verebilir`); `girisYaptiMi(Hesap 3)` false |
+| 3 | Görevli, kayıtsız adrese (Hesap 4) giriş verir | Ret | Ret (`Adres kayitli degil`); `girisYaptiMi(Hesap 4)` false |
+| 4 | Aynı katılımcıya (Hesap 2) ikinci giriş | Ret; ilk giriş korunur | Ret (`Giris zaten yapildi`); `girisYaptiMi(Hesap 2)` hâlâ true |
+
+Önceki kayıt ve kapasite denemelerini yeni sürümde de tekrarladım: ilk kayıt kabul (toplam 1), aynı hesaptan tekrar kayıt ret, boş ad ret, ikinci ve üçüncü kayıt kabul (toplam 3), dördüncü hesap `Kapasite dolu` ile ret (toplam 3). Reddedilen işlemler kayıt sayısını değiştirmedi ve kayıt başarılı olduğunda `KayitYapildi` event'i yayımlandı.
+
+### Benim yorumum: Arayüzde düğmeyi gizlemek yerine yetkiyi sözleşmede denetlemek neden gerekir?
+
+Arayüz yalnızca tarayıcıda çalışan, kullanıcının kontrolündeki bir koddur. Düğmeyi gizlemek kimseyi engellemez. Zincirdeki sözleşme herkese açık olduğu için herkes adresi ve ABI'yi kullanıp Etherscan, Remix veya kendi betiğiyle `girisYap`'ı doğrudan çağırabilir. Yetkiyi `require(msg.sender == gorevli)` ile sözleşmede denetlediğimizde, çağrı hangi arayüzden gelirse gelsin görevli olmayan adres reddedilir. Güvenliğin tek güvenilir yeri, kuralı değiştirilemez şekilde zincirde uygulayan sözleşmedir.
