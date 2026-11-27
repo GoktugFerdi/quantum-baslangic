@@ -142,3 +142,57 @@ Denemeleri [`test/ip22-test.js`](test/ip22-test.js) betiğiyle yerel bir EVM'de 
 ### Benim yorumum: Arayüzde düğmeyi gizlemek yerine yetkiyi sözleşmede denetlemek neden gerekir?
 
 Arayüz yalnızca tarayıcıda çalışan, kullanıcının kontrolündeki bir koddur. Düğmeyi gizlemek kimseyi engellemez. Zincirdeki sözleşme herkese açık olduğu için herkes adresi ve ABI'yi kullanıp Etherscan, Remix veya kendi betiğiyle `girisYap`'ı doğrudan çağırabilir. Yetkiyi `require(msg.sender == gorevli)` ile sözleşmede denetlediğimizde, çağrı hangi arayüzden gelirse gelsin görevli olmayan adres reddedilir. Güvenliğin tek güvenilir yeri, kuralı değiştirilemez şekilde zincirde uygulayan sözleşmedir.
+
+
+---
+
+## GfuEvent.sol Sepolia'da (İP 23: Etkinlik Sözleşmemi Sepolia'ya Taşı)
+
+İP 22'deki son [`GfuEvent.sol`](GfuEvent.sol) sürümünü hiç değiştirmeden Sepolia'ya yayınladım. Bu, takımın `QuantumKayit` kopyalarından ve yerel denemelerden ayrı, **kendi etkinlik sözleşmemin** Sepolia örneğidir.
+
+### Deploy bilgileri
+
+| Bilgi | Değer |
+|---|---|
+| Ağ | Ethereum Sepolia (chain ID 11155111) |
+| Sözleşme adresi | `0x05781f2cbfb8010643f277728598977abAa26f58` |
+| Deploy tx hash | `0xd7370e91f37be995e9f1c585cb416c65a4a120ab8f580dae85c460deacfcfba9` |
+| Blok | 12221934 |
+| Deploy eden / görevli | Eğitim hesabı 1: `0x344fDdb0F24005603797377189a0bfD277703e12` |
+| Derleyici | Remix, 0.8.34+ (optimizasyon ve EVM hedefi Remix varsayılanı, değiştirilmedi) |
+| ABI | [`sepolia/GfuEvent.abi.json`](sepolia/GfuEvent.abi.json) |
+| Explorer | https://sepolia.etherscan.io/address/0x05781f2cbfb8010643f277728598977abAa26f58 |
+
+Constructor parametresi yoktur; `gorevli` değeri `msg.sender` olduğu için görevli deploy eden Eğitim hesabı 1'dir. Depoya hiçbir gizli anahtar veya kurtarma kelimesi eklenmedi. Kendi etkinlik sözleşmemi Etherscan'de verify etmedim (İP 23'te ek çalışma).
+
+### Yapılan işlemler
+
+| # | İşlem | Hesap | Sonuç | Tx hash |
+|---|---|---|---|---|
+| 1 | Deploy | Eğitim hesabı 1 | Başarılı, blok 12221934 | `0xd7370e91f37be995e9f1c585cb416c65a4a120ab8f580dae85c460deacfcfba9` |
+| 2 | `kayitOl("ikinci")` | Eğitim hesabı 2 (`0xf8F3ED6c7b197146a6640c840BBe95D1E71E8bF1`) | Başarılı, blok 12222039, `KayitYapildi` event'i | `0xcafbb30bb86be0e868b0ef9484aa03e842c00f0f3cbec35904c8540d69f0c6fa` |
+| 3 | `girisYap(Eğitim hesabı 2)` | Eğitim hesabı 1 (görevli) | Başarılı, blok 12222044, `GirisYapildi` event'i | `0x8172d6ec3fc0f626dceb3d4f5281fe85cad10b9e4d01e5e822f23c44d46be5f1` |
+
+Eğitim hesabı 1 de bu örneğe kayıtlıdır; zincirdeki toplam kayıt sayısı 2.
+
+### Ek olarak zincirde görülen başarısız işlemler
+
+Bu iki işlem Remix tarafından gönderildi ve zincirde `Fail` ile sonuçlandı. Durum değişmedi; yalnızca küçük bir ücret ödendi.
+
+| İşlem | Neden başarısız | Tx hash |
+|---|---|---|
+| Görevli, henüz kayıtsız olan Eğitim hesabı 2'ye `girisYap` verdi (blok 12221957) | Adres kayıtlı değildi (`Adres kayitli degil`) | `0xc7cca5c223be60efd075d95f206d1677c637aa96d70d32844c3b4602e670d91c` |
+| Eğitim hesabı 1 ikinci kez `kayitOl` çağırdı (blok 12222042) | `Bu adres zaten kayitli` | `0x6bb2b00dc87063c981e4e3d7c5fc901721c827bec43460faa1b220e29cba6716` |
+
+### Okunan durum
+
+- `kayitSayisi` = 2
+- `kayitliMi(Eğitim hesabı 2)` = true, `takmaAd(Eğitim hesabı 2)` = `ikinci`
+- Eğitim hesabı 2 için giriş işlemi başarılı oldu ve `GirisYapildi(Eğitim hesabı 2)` event'i yayımlandı.
+- Yerel (Remix VM / ganache) denemelerdeki kayıtlar Sepolia örneğine taşınmadı; yeni örnekte yalnızca Sepolia'da yaptığım iki kayıt var.
+
+Ekran görüntüleri `notlar/ekran-goruntuleri/` altında `ip23-*.png` adlarıyla durur.
+
+### Benim yorumum: Yerel ve Sepolia sürümlerini karıştırmamak için hangi bilgileri kontrol ederim?
+
+Önce ağı: MetaMask ve Remix'te ağın Sepolia (chain ID 11155111), ortamın Remix VM değil Injected Provider olduğuna bakarım. Sonra sözleşme adresini: yerel deploy'un adresi Sepolia'da yoktur, bu yüzden proje yapılandırmasındaki adresi, bu belgedeki adresle ve Etherscan'deki "Contract Created" işlemiyle karşılaştırırım. Deploy tx hash'i ve blok numarası da ayırıcıdır. Ek olarak `gorevli` ve `kayitSayisi` okunur; yerelde 3 kayıt dolu olsa bile yeni örnekte kayıtlar sıfırdan başlar. Aynı kod farklı adreste ayrı bir state tutar.

@@ -9,6 +9,15 @@ build/
 *.key
 *secret*
 *mnemonic*
+*seed*
+*private*
+*kelime*
+*12 kelim*
+*Etheryum adresi*
+*Ethereum adresi*
+*GooglCloud*
+*google*cloud*
+*.pem
 
 # Editör ve sistem dosyaları
 .vscode/
@@ -18,3 +27,7 @@ Thumbs.db
 # Word'ün açık dosya için oluşturduğu geçici kopyalar
 ~$*
 desktop.ini
+
+# Test betiğinin yerelde ürettiği dosyalar
+sozlesmeler/test/package*.json
+sozlesmeler/test/ip22-sonuc.json
